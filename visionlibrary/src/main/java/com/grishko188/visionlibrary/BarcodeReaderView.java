@@ -12,6 +12,7 @@ import android.content.res.TypedArray;
 import android.hardware.Camera;
 import android.media.MediaPlayer;
 import android.os.Build;
+import android.os.Vibrator;
 import android.support.annotation.ColorInt;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresPermission;
@@ -58,6 +59,7 @@ public class BarcodeReaderView extends LinearLayout implements View.OnTouchListe
     private boolean mIsDrawText = false;
     private boolean mPlaySoundWhenScanSuccess = false;
     private boolean mIsStopped;
+    private boolean mVibrateWhenSuccess;
 
     private int mBarcodeFormat = Barcode.ALL_FORMATS;
 
@@ -69,6 +71,8 @@ public class BarcodeReaderView extends LinearLayout implements View.OnTouchListe
     private GestureDetector mGestureDetector;
 
     private BarcodeReaderListener mListener;
+    private Vibrator mDeviceVibrator;
+    private long[] mDefaultVibratePattern = {0, 200, 200, 200};
 
     public BarcodeReaderView(Context context) {
         super(context);
@@ -105,6 +109,8 @@ public class BarcodeReaderView extends LinearLayout implements View.OnTouchListe
         mScaleGestureDetector = new ScaleGestureDetector(getContext(), new ScaleListener());
 
         setOnTouchListener(this);
+
+        mDeviceVibrator = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
     }
 
     private void initAttributes(AttributeSet attributeSet) {
@@ -146,6 +152,13 @@ public class BarcodeReaderView extends LinearLayout implements View.OnTouchListe
      */
     public void setPlaySoundWhenScanSuccess(boolean play) {
         this.mPlaySoundWhenScanSuccess = play;
+    }
+
+    /**
+     * Set if need to vibrate  automatically, after success scanning
+     */
+    public void setVibrateWhenScanSuccess(boolean vibrate) {
+        this.mVibrateWhenSuccess = vibrate;
     }
 
     /**
@@ -279,6 +292,15 @@ public class BarcodeReaderView extends LinearLayout implements View.OnTouchListe
         }
     }
 
+    public void vibrate() {
+        vibrate(mDefaultVibratePattern);
+    }
+
+    public void vibrate(long[] pattern) {
+        if (mDeviceVibrator != null)
+            mDeviceVibrator.vibrate(pattern, -1);
+    }
+
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
         boolean b = mScaleGestureDetector.onTouchEvent(motionEvent);
@@ -294,6 +316,8 @@ public class BarcodeReaderView extends LinearLayout implements View.OnTouchListe
             mListener.onScanned(barcode);
             if (mPlaySoundWhenScanSuccess)
                 playSound();
+            if (mVibrateWhenSuccess)
+                vibrate();
         }
     }
 
@@ -303,6 +327,8 @@ public class BarcodeReaderView extends LinearLayout implements View.OnTouchListe
             mListener.onScannedMultiple(barcodeList);
             if (mPlaySoundWhenScanSuccess)
                 playSound();
+            if (mVibrateWhenSuccess)
+                vibrate();
         }
     }
 
@@ -312,6 +338,8 @@ public class BarcodeReaderView extends LinearLayout implements View.OnTouchListe
             mListener.onBitmapScanned(sparseArray);
             if (mPlaySoundWhenScanSuccess)
                 playSound();
+            if (mVibrateWhenSuccess)
+                vibrate();
         }
     }
 

@@ -9,7 +9,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -32,7 +31,8 @@ public class MainActivity extends AppCompatActivity implements BarcodeReaderView
         setContentView(R.layout.activity_main);
 
         barcodeReader = findViewById(R.id.barcode_view);
-        barcodeReader.setPlaySoundWhenScanSuccess(false);
+        barcodeReader.setPlaySoundWhenScanSuccess(true);
+        barcodeReader.setVibrateWhenScanSuccess(true);
         barcodeReader.setBarcodeFormatPreInitState(Barcode.ALL_FORMATS);
         barcodeReader.setBarcodeReaderListener(this);
         barcodeReader.setFoundedBarcodeRectColors(Color.RED);
@@ -41,39 +41,30 @@ public class MainActivity extends AppCompatActivity implements BarcodeReaderView
         mResumePauseButton = findViewById(R.id.pause_scanning);
         mStopStartButton = findViewById(R.id.stop_camera);
 
-        mToggleFlashButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                barcodeReader.setFlashEnable(!barcodeReader.isFlashEnabled());
-                mToggleFlashButton.setText(barcodeReader.isFlashEnabled() ? "Disable flash" : "Enable flash");
-            }
+        mToggleFlashButton.setOnClickListener(view -> {
+            barcodeReader.setFlashEnable(!barcodeReader.isFlashEnabled());
+            mToggleFlashButton.setText(barcodeReader.isFlashEnabled() ? "Disable flash" : "Enable flash");
         });
 
-        mResumePauseButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (barcodeReader.isOnPause()) {
-                    barcodeReader.resumeScanning();
-                } else {
-                    barcodeReader.pauseScanning();
-                }
-                mResumePauseButton.setText(barcodeReader.isOnPause() ? "Resume" : "Pause");
+        mResumePauseButton.setOnClickListener(view -> {
+            if (barcodeReader.isOnPause()) {
+                barcodeReader.resumeScanning();
+            } else {
+                barcodeReader.pauseScanning();
             }
+            mResumePauseButton.setText(barcodeReader.isOnPause() ? "Resume" : "Pause");
         });
 
-        mStopStartButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (barcodeReader.isStopped()) {
-                    if (barcodeReader != null)
-                        if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                            barcodeReader.startCamera();
-                        }
-                } else {
-                    barcodeReader.stopCamera();
-                }
-                mStopStartButton.setText(barcodeReader.isStopped() ? "Start" : "Stop");
+        mStopStartButton.setOnClickListener(view -> {
+            if (barcodeReader.isStopped()) {
+                if (barcodeReader != null)
+                    if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                        barcodeReader.startCamera();
+                    }
+            } else {
+                barcodeReader.stopCamera();
             }
+            mStopStartButton.setText(barcodeReader.isStopped() ? "Start" : "Stop");
         });
     }
 
@@ -108,12 +99,7 @@ public class MainActivity extends AppCompatActivity implements BarcodeReaderView
     @Override
     public void onScanned(final Barcode barcode) {
         Log.d(TAG, "onScanned: " + barcode.displayValue);
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(getApplicationContext(), "Barcode: " + barcode.displayValue, Toast.LENGTH_SHORT).show();
-            }
-        });
+        runOnUiThread(() -> Toast.makeText(getApplicationContext(), "Barcode: " + barcode.displayValue, Toast.LENGTH_SHORT).show());
     }
 
     @Override
@@ -126,12 +112,7 @@ public class MainActivity extends AppCompatActivity implements BarcodeReaderView
         }
 
         final String finalCodes = codes.toString();
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(getApplicationContext(), "Barcodes: " + finalCodes, Toast.LENGTH_SHORT).show();
-            }
-        });
+        runOnUiThread(() -> Toast.makeText(getApplicationContext(), "Barcodes: " + finalCodes, Toast.LENGTH_SHORT).show());
     }
 
     @Override
@@ -141,32 +122,17 @@ public class MainActivity extends AppCompatActivity implements BarcodeReaderView
 
     @Override
     public void onScanError(final String errorMessage) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(getApplicationContext(), "Barcodes: " + errorMessage, Toast.LENGTH_SHORT).show();
-            }
-        });
+        runOnUiThread(() -> Toast.makeText(getApplicationContext(), "Barcodes: " + errorMessage, Toast.LENGTH_SHORT).show());
     }
 
     @Override
     public void onPlayServicesNotAvailableError() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(getApplicationContext(), "Google play services not available", Toast.LENGTH_SHORT).show();
-            }
-        });
+        runOnUiThread(() -> Toast.makeText(getApplicationContext(), "Google play services not available", Toast.LENGTH_SHORT).show());
     }
 
     @Override
     public void onBarcodeNotOperationalYetError() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(getApplicationContext(), "On barcode not yet operational, please wait for a while", Toast.LENGTH_SHORT).show();
-            }
-        });
+        runOnUiThread(() -> Toast.makeText(getApplicationContext(), "On barcode not yet operational, please wait for a while", Toast.LENGTH_SHORT).show());
         new Handler().postDelayed(this::startCamera, 1000);
     }
 }
