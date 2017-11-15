@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -79,6 +80,10 @@ public class MainActivity extends AppCompatActivity implements BarcodeReaderView
     @Override
     protected void onResume() {
         super.onResume();
+        startCamera();
+    }
+
+    private void startCamera() {
         if (barcodeReader != null)
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
                 barcodeReader.startCamera();
@@ -159,8 +164,9 @@ public class MainActivity extends AppCompatActivity implements BarcodeReaderView
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(getApplicationContext(), "On barcode not yet operational", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "On barcode not yet operational, please wait for a while", Toast.LENGTH_SHORT).show();
             }
         });
+        new Handler().postDelayed(this::startCamera, 1000);
     }
 }
