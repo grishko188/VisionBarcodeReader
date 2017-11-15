@@ -27,11 +27,11 @@ import com.grishko188.visionlibrary.camera.GraphicOverlay;
  * Graphic instance for rendering barcode position, size, and ID within an associated graphic
  * overlay view.
  */
-public class BarcodeGraphic extends GraphicOverlay.Graphic {
+class BarcodeGraphic extends GraphicOverlay.Graphic {
 
     private int mId;
 
-    private static final int COLOR_CHOICES[] = {
+    private static final Integer COLOR_CHOICES[] = {
             Color.BLUE,
             Color.CYAN,
             Color.GREEN
@@ -47,8 +47,16 @@ public class BarcodeGraphic extends GraphicOverlay.Graphic {
     BarcodeGraphic(GraphicOverlay overlay) {
         super(overlay);
         this.overlay = overlay;
-        mCurrentColorIndex = (mCurrentColorIndex + 1) % COLOR_CHOICES.length;
-        final int selectedColor = COLOR_CHOICES[mCurrentColorIndex];
+
+        Integer[] colors;
+        if (overlay.getColors() != null) {
+            colors = overlay.getColors();
+        } else {
+            colors = COLOR_CHOICES;
+        }
+
+        mCurrentColorIndex = (mCurrentColorIndex + 1) % colors.length;
+        final int selectedColor = colors[mCurrentColorIndex];
 
         mRectPaint = new Paint();
         mRectPaint.setColor(selectedColor);
@@ -102,7 +110,7 @@ public class BarcodeGraphic extends GraphicOverlay.Graphic {
             canvas.drawRect(rect, mRectPaint);
 
         // Draws a label at the bottom of the barcode indicate the barcode value that was detected.
-        if (overlay.isShowText())
+        if (overlay.isDrawText())
             canvas.drawText(barcode.rawValue, rect.left, rect.bottom, mTextPaint);
     }
 }

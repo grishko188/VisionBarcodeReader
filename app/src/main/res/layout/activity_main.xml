@@ -1,18 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.grishko188.visionbarcodereader.MainActivity">
 
-    <fragment
-        android:id="@+id/barcode_fragment"
-        android:name="com.grishko188.visionlibrary.BarcodeReader"
+    <com.grishko188.visionlibrary.BarcodeReaderView
+        android:id="@+id/barcode_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:auto_focus="true"
-        app:use_flash="false"
-        app:draw_rect="true"/>
+        app:draw_rect="true"
+        app:draw_text="false"
+        app:use_flash="false" />
 
-</android.support.constraint.ConstraintLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/toggle_flash"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Enable flash" />
+
+        <Button
+            android:id="@+id/stop_camera"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Stop" />
+
+        <Button
+            android:id="@+id/pause_scanning"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Pause" />
+    </LinearLayout>
+
+</FrameLayout>

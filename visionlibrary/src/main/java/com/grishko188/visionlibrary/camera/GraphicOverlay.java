@@ -29,11 +29,11 @@ import java.util.Vector;
  * A view which renders a series of custom graphics to be overlayed on top of an associated preview
  * (i.e., the camera preview).  The creator can add graphics objects, update the objects, and remove
  * them, triggering the appropriate drawing and invalidation within the view.<p>
- *
+ * <p>
  * Supports scaling and mirroring of the graphics relative the camera's preview properties.  The
  * idea is that detection items are expressed in terms of a preview size, but need to be scaled up
  * to the full view size, and also mirrored in the case of the front-facing camera.<p>
- *
+ * <p>
  * Associated {@link Graphic} items should use the following methods to convert to view coordinates
  * for the graphics that are drawn:
  * <ol>
@@ -44,6 +44,7 @@ import java.util.Vector;
  * </ol>
  */
 public class GraphicOverlay<T extends GraphicOverlay.Graphic> extends View {
+
     private final Object mLock = new Object();
     private int mPreviewWidth;
     private float mWidthScaleFactor = 1.0f;
@@ -51,13 +52,16 @@ public class GraphicOverlay<T extends GraphicOverlay.Graphic> extends View {
     private float mHeightScaleFactor = 1.0f;
     private int mFacing = CameraSource.CAMERA_FACING_BACK;
     private Set<T> mGraphics = new HashSet<>();
-    private boolean showText,drawRect;
+    private boolean mDrawText, mDrawRect;
+    private Integer[] mColors;
+
     /**
      * Base class for a custom graphics object to be rendered within the graphic overlay.  Subclass
      * this and implement the {@link Graphic#draw(Canvas)} method to define the
      * graphics element.  Add instances to the overlay using {@link GraphicOverlay#add(Graphic)}.
      */
     public static abstract class Graphic {
+
         private GraphicOverlay mOverlay;
 
         public Graphic(GraphicOverlay overlay) {
@@ -122,20 +126,28 @@ public class GraphicOverlay<T extends GraphicOverlay.Graphic> extends View {
         super(context, attrs);
     }
 
-    public boolean isShowText() {
-        return this.showText;
+    public boolean isDrawText() {
+        return this.mDrawText;
     }
 
-    public void setShowText(boolean showText) {
-        this.showText = showText;
+    public void setDrawText(boolean drawText) {
+        this.mDrawText = drawText;
     }
 
     public boolean isDrawRect() {
-        return this.drawRect;
+        return this.mDrawRect;
     }
 
     public void setDrawRect(boolean drawRect) {
-        this.drawRect = drawRect;
+        this.mDrawRect = drawRect;
+    }
+
+    public void setRectColors(Integer[] colors) {
+        this.mColors = colors;
+    }
+
+    public Integer[] getColors() {
+        return mColors;
     }
 
     /**
@@ -170,6 +182,7 @@ public class GraphicOverlay<T extends GraphicOverlay.Graphic> extends View {
 
     /**
      * Returns a copy (as a list) of the set of all active graphics.
+     *
      * @return list of all active graphics.
      */
     public List<T> getGraphics() {

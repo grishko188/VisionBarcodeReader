@@ -1,50 +1,108 @@
 package com.grishko188.visionbarcodereader;
 
-import android.support.v7.app.AppCompatActivity;
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.gms.vision.barcode.Barcode;
-import com.grishko188.visionlibrary.BarcodeReader;
+import com.grishko188.visionlibrary.BarcodeReaderView;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements BarcodeReader.BarcodeReaderListener {
+public class MainActivity extends AppCompatActivity implements BarcodeReaderView.BarcodeReaderListener {
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private BarcodeReader barcodeReader;
+    private BarcodeReaderView barcodeReader;
+    private Button mToggleFlashButton;
+    private Button mStopStartButton;
+    private Button mResumePauseButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // getting barcode instance
-        barcodeReader = (BarcodeReader) getSupportFragmentManager().findFragmentById(R.id.barcode_fragment);
+        barcodeReader = findViewById(R.id.barcode_view);
+        barcodeReader.setPlaySoundWhenScanSuccess(false);
+        barcodeReader.setBarcodeFormatPreInitState(Barcode.ALL_FORMATS);
+        barcodeReader.setBarcodeReaderListener(this);
+        barcodeReader.setFoundedBarcodeRectColors(Color.RED);
 
+        mToggleFlashButton = findViewById(R.id.toggle_flash);
+        mResumePauseButton = findViewById(R.id.pause_scanning);
+        mStopStartButton = findViewById(R.id.stop_camera);
 
-        /***
-         * Providing beep sound. The sound file has to be placed in
-         * `assets` folder
-         */
-        // barcodeReader.setBeepSoundFile("shutter.mp3");
+        mToggleFlashButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                barcodeReader.setFlashEnable(!barcodeReader.isFlashEnabled());
+                mToggleFlashButton.setText(barcodeReader.isFlashEnabled() ? "Disable flash" : "Enable flash");
+            }
+        });
 
-        /**
-         * Pausing / resuming barcode reader. This will be useful when you want to
-         * do some foreground user interaction while leaving the barcode
-         * reader in background
-         * */
-        // barcodeReader.pauseScanning();
-        // barcodeReader.resumeScanning();
+        mResumePauseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (barcodeReader.isOnPause()) {
+                    barcodeReader.resumeScanning();
+                } else {
+                    barcodeReader.pauseScanning();
+                }
+                mResumePauseButton.setText(barcodeReader.isOnPause() ? "Resume" : "Pause");
+            }
+        });
+
+        mStopStartButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (barcodeReader.isStopped()) {
+                    if (barcodeReader != null)
+                        if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                            barcodeReader.startCamera();
+                        }
+                } else {
+                    barcodeReader.stopCamera();
+                }
+                mStopStartButton.setText(barcodeReader.isStopped() ? "Start" : "Stop");
+            }
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (barcodeReader != null)
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                barcodeReader.startCamera();
+                return;
+            }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (barcodeReader != null)
+            barcodeReader.stopCamera();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (barcodeReader != null)
+            barcodeReader.releaseCamera();
     }
 
     @Override
     public void onScanned(final Barcode barcode) {
-        Log.e(TAG, "onScanned: " + barcode.displayValue);
-        barcodeReader.playBeep();
-
+        Log.d(TAG, "onScanned: " + barcode.displayValue);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -55,14 +113,14 @@ public class MainActivity extends AppCompatActivity implements BarcodeReader.Bar
 
     @Override
     public void onScannedMultiple(List<Barcode> barcodes) {
-        Log.e(TAG, "onScannedMultiple: " + barcodes.size());
+        Log.d(TAG, "onScannedMultiple: " + barcodes.size());
 
-        String codes = "";
+        StringBuilder codes = new StringBuilder();
         for (Barcode barcode : barcodes) {
-            codes += barcode.displayValue + ", ";
+            codes.append(barcode.displayValue).append(", ");
         }
 
-        final String finalCodes = codes;
+        final String finalCodes = codes.toString();
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -77,7 +135,22 @@ public class MainActivity extends AppCompatActivity implements BarcodeReader.Bar
     }
 
     @Override
-    public void onScanError(String errorMessage) {
+    public void onScanError(final String errorMessage) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(), "Barcodes: " + errorMessage, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
+    @Override
+    public void onReaderNotAvailable() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(), "Google play services not available", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }
