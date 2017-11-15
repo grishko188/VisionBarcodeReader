@@ -5,7 +5,7 @@ android {
     buildToolsVersion '27.0.0'
     defaultConfig {
         applicationId "com.grishko188.visionbarcodereader"
-        minSdkVersion 17
+        minSdkVersion 18
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
