@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="BarcodeReader">
+        <attr name="auto_focus" format="boolean" />
+        <attr name="use_flash" format="boolean" />
+        <attr name="draw_rect" format="boolean" />
+    </declare-styleable>
+</resources>
