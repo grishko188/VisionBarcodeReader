@@ -355,7 +355,7 @@ public class BarcodeReaderView extends LinearLayout implements View.OnTouchListe
             }
 
             if (mListener != null)
-                mListener.onReaderNotAvailable();
+                mListener.onBarcodeNotOperationalYetError();
 
             return;
         }
@@ -376,13 +376,8 @@ public class BarcodeReaderView extends LinearLayout implements View.OnTouchListe
     private void startCameraSource() throws SecurityException {
         int code = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getContext());
         if (code != ConnectionResult.SUCCESS) {
-            
-            String errorString =
-                    GoogleApiAvailability.getInstance().getErrorString(code);
-            Toast.makeText(getContext(), errorString, Toast.LENGTH_SHORT).show();
-
             if (mListener != null)
-                mListener.onReaderNotAvailable();
+                mListener.onPlayServicesNotAvailableError();
             return;
         }
 
@@ -508,6 +503,8 @@ public class BarcodeReaderView extends LinearLayout implements View.OnTouchListe
 
         void onScanError(String errorMessage);
 
-        void onReaderNotAvailable();
+        void onPlayServicesNotAvailableError();
+
+        void onBarcodeNotOperationalYetError();
     }
 }

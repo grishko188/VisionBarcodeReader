@@ -145,11 +145,21 @@ public class MainActivity extends AppCompatActivity implements BarcodeReaderView
     }
 
     @Override
-    public void onReaderNotAvailable() {
+    public void onPlayServicesNotAvailableError() {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 Toast.makeText(getApplicationContext(), "Google play services not available", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    @Override
+    public void onBarcodeNotOperationalYetError() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(), "On barcode not yet operational", Toast.LENGTH_SHORT).show();
             }
         });
     }
