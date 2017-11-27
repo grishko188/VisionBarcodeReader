@@ -378,7 +378,8 @@ public class BarcodeReaderView extends LinearLayout implements View.OnTouchListe
                 hasLowStorage = getContext().registerReceiver(null, lowStorageFilter) != null;
 
             if (hasLowStorage) {
-                Toast.makeText(getContext(), R.string.low_storage_error, Toast.LENGTH_LONG).show();
+                if (BuildConfig.DEBUG)
+                    Toast.makeText(getContext(), R.string.low_storage_error, Toast.LENGTH_LONG).show();
                 Log.e(TAG, getContext().getString(R.string.low_storage_error));
             }
 
